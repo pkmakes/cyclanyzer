@@ -22,9 +22,11 @@ type CycleChartProps = {
   previewCycle: CycleMeasurement | null;
   targetCycleTimeMs: number | undefined;
   activityTypes: ActivityType[];
+  /** When true, chart stretches to fill its parent (used in measurement mode) */
+  fillHeight?: boolean;
 };
 
-export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTypes }: CycleChartProps) {
+export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTypes, fillHeight }: CycleChartProps) {
   const chartData = buildChartData(cycles, previewCycle);
   const activityKeys = getActivityKeys(cycles, previewCycle);
 
@@ -73,8 +75,8 @@ export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTy
   const targetSeconds = targetCycleTimeMs ? msToSeconds(targetCycleTimeMs) : undefined;
 
   return (
-    <div className="cycle-chart">
-      <ResponsiveContainer width="100%" height={360}>
+    <div className={`cycle-chart ${fillHeight ? 'cycle-chart--fill' : ''}`}>
+      <ResponsiveContainer width="100%" height={fillHeight ? '100%' : 360}>
         <BarChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis dataKey="label" tick={{ fontSize: 12 }} />

@@ -9,7 +9,7 @@ type FinalSegmentDialogProps = {
 
 export function FinalSegmentDialog({ activityTypes, onSelect }: FinalSegmentDialogProps) {
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay modal-overlay--top">
       <div className="modal-content final-segment-dialog">
         <h3 className="modal-title">Letztes Segment zuordnen</h3>
         <p className="final-segment-dialog__hint">

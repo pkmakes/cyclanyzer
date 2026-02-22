@@ -9,6 +9,7 @@ import { useCycleTimer } from './hooks/useCycleTimer';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { loadFromLocalStorage, useLocalStorageSync } from './hooks/useLocalStorageSync';
 import { AppLayout } from './components/layout/AppLayout';
+import { MeasurementLayout } from './components/layout/MeasurementLayout';
 import { Panel } from './components/layout/Panel';
 import { CycleControls } from './components/controls/CycleControls';
 import { TargetCycleTimeInput } from './components/controls/TargetCycleTimeInput';
@@ -35,6 +36,9 @@ export default function App() {
 
   // Pending-stop state: timer is frozen, waiting for final segment activity choice
   const [pendingStopTimestamp, setPendingStopTimestamp] = useState<number | null>(null);
+
+  // Measurement mode toggle – auto-activates on start, user can exit manually
+  const [measureMode, setMeasureMode] = useState(false);
 
   // Toast helpers
   const addToast = useCallback((text: string, type: ToastMessage['type']) => {
@@ -154,16 +158,26 @@ export default function App() {
 
   useKeyboardShortcuts({ onSpace: handleSpace, onDigit: handleDigit });
 
-  // Layout
+  const showMeasureMode = measureMode;
+
   const header = (
     <div className="header-content">
       <h1 className="app-title">Cyclanyzer</h1>
-      <ImportExportControls
-        state={state}
-        onImport={handleImport}
-        onError={(msg) => addToast(msg, 'error')}
-        onSuccess={(msg) => addToast(msg, 'success')}
-      />
+      <div className="header-actions">
+        <button
+          className="mode-toggle"
+          onClick={() => setMeasureMode((prev) => !prev)}
+          title={measureMode ? 'Zum Dashboard wechseln' : 'Zum Messmodus wechseln'}
+        >
+          {measureMode ? '◳ Dashboard' : '◱ Messmodus'}
+        </button>
+        <ImportExportControls
+          state={state}
+          onImport={handleImport}
+          onError={(msg) => addToast(msg, 'error')}
+          onSuccess={(msg) => addToast(msg, 'success')}
+        />
+      </div>
     </div>
   );
 
@@ -221,8 +235,39 @@ export default function App() {
 
   return (
     <>
+      {/* Dashboard is always in the DOM */}
       <AppLayout header={header} leftColumn={leftColumn} rightColumn={rightColumn} />
+
+      {/* Measurement mode overlays when active */}
+      {showMeasureMode && (
+        <MeasurementLayout
+          isRunning={activeCycle.isRunning}
+          elapsedMs={elapsedMs}
+          onStart={handleStart}
+          onStop={handleStop}
+          onExitMeasureMode={() => setMeasureMode(false)}
+          chart={
+            <CycleChart
+              cycles={state.cycles}
+              previewCycle={previewCycle}
+              targetCycleTimeMs={state.settings.targetCycleTimeMs}
+              activityTypes={state.activityTypes}
+              fillHeight
+            />
+          }
+          activityPad={
+            <ActivityPad
+              activityTypes={state.activityTypes}
+              isRunning={activeCycle.isRunning}
+              onActivityClick={handleActivityClick}
+            />
+          }
+        />
+      )}
+
       <ToastContainer messages={toasts} onDismiss={dismissToast} />
+
+      {/* Final segment dialog always renders on top regardless of layout mode */}
       {pendingStopTimestamp !== null && (
         <FinalSegmentDialog
           activityTypes={state.activityTypes}
