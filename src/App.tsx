@@ -30,7 +30,7 @@ function getInitialState(): AppState {
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, getInitialState);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const { markDirty, markClean } = useBeforeUnloadWarning();
+  const { markDirty, markClean, isDirty } = useBeforeUnloadWarning();
 
   useLocalStorageSync(state);
 
@@ -148,6 +148,14 @@ export default function App() {
     dispatch({ type: 'IMPORT_STATE', payload: importedState });
   }
 
+  function handleNew() {
+    if (isDirty() && !window.confirm('Es gibt ungespeicherte Änderungen. Ohne Speichern fortfahren?')) {
+      return;
+    }
+    dispatch({ type: 'RESET_STATE', payload: initialAppState });
+    markClean();
+  }
+
   // Keyboard shortcuts
   const handleSpace = useCallback(() => {
     if (activeCycle.isRunning) {
@@ -176,6 +184,9 @@ export default function App() {
     <div className="header-content">
       <h1 className="app-title">Cyclanyzer</h1>
       <div className="header-actions">
+        <Button variant="ghost" size="sm" onClick={handleNew}>
+          Neu
+        </Button>
         <ImportExportControls
           state={state}
           onImport={handleImport}

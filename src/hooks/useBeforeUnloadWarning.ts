@@ -27,5 +27,7 @@ export function useBeforeUnloadWarning() {
     dirty.current = false;
   }, []);
 
-  return { markDirty, markClean };
+  const isDirty = useCallback(() => dirty.current, []);
+
+  return { markDirty, markClean, isDirty };
 }
