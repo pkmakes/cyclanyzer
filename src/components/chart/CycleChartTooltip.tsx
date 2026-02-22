@@ -1,4 +1,3 @@
-import type { TooltipProps } from 'recharts';
 import { formatPercent, formatSeconds } from '../../utils/format';
 import type { SegmentChartMeta } from '../../types/domain';
 
@@ -7,6 +6,7 @@ type PayloadEntry = {
   value: number;
   color: string;
   name: string;
+  payload?: CustomPayload;
 };
 
 type CustomPayload = {
@@ -15,11 +15,17 @@ type CustomPayload = {
   _meta?: SegmentChartMeta[];
 };
 
-export function CycleChartTooltip({ active, payload, label }: TooltipProps<number, string>) {
+type CycleChartTooltipProps = {
+  active?: boolean;
+  payload?: PayloadEntry[];
+  label?: string;
+};
+
+export function CycleChartTooltip({ active, payload, label }: CycleChartTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
 
   const data = (payload[0]?.payload ?? {}) as CustomPayload;
-  const entries = payload as unknown as PayloadEntry[];
+  const entries = payload;
   const meta = data._meta ?? [];
   const total = data.totalSeconds ?? 0;
 

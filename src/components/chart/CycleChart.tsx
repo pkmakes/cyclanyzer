@@ -25,7 +25,7 @@ type CycleChartProps = {
   fillHeight?: boolean;
 };
 
-export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTypes, fillHeight }: CycleChartProps) {
+export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, fillHeight }: CycleChartProps) {
   const chartData = buildChartData(cycles, previewCycle);
   const activityKeys = getActivityKeys(cycles, previewCycle);
   const maxSegs = getMaxSegments(chartData);
