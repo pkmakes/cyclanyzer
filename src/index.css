@@ -189,9 +189,10 @@ body {
   font-family: var(--font);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   white-space: nowrap;
   user-select: none;
+  touch-action: manipulation;
 }
 
 .btn:focus-visible {
@@ -233,33 +234,21 @@ body {
   background: var(--primary);
   color: #fff;
 }
-.btn--primary:hover:not(:disabled) {
-  background: var(--primary-hover);
-}
 
 .btn--secondary {
   background: var(--surface-alt);
   color: var(--text);
   border: 1px solid var(--border);
 }
-.btn--secondary:hover:not(:disabled) {
-  background: var(--border);
-}
 
 .btn--danger {
   background: var(--danger);
   color: #fff;
 }
-.btn--danger:hover:not(:disabled) {
-  background: var(--danger-hover);
-}
 
 .btn--success {
   background: var(--success);
   color: #fff;
-}
-.btn--success:hover:not(:disabled) {
-  background: var(--success-hover);
 }
 
 .btn--ghost {
@@ -267,8 +256,23 @@ body {
   color: var(--text);
   border: 1px solid var(--border);
 }
-.btn--ghost:hover:not(:disabled) {
-  background: var(--surface-alt);
+
+@media (hover: hover) {
+  .btn--primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+  }
+  .btn--secondary:hover:not(:disabled) {
+    background: var(--border);
+  }
+  .btn--danger:hover:not(:disabled) {
+    background: var(--danger-hover);
+  }
+  .btn--success:hover:not(:disabled) {
+    background: var(--success-hover);
+  }
+  .btn--ghost:hover:not(:disabled) {
+    background: var(--surface-alt);
+  }
 }
 
 /* Icon buttons */
@@ -280,17 +284,20 @@ body {
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  touch-action: manipulation;
 }
 
-.icon-btn:hover {
-  background: var(--surface-alt);
-  color: var(--text);
-}
+@media (hover: hover) {
+  .icon-btn:hover {
+    background: var(--surface-alt);
+    color: var(--text);
+  }
 
-.icon-btn--danger:hover {
-  background: var(--danger-light);
-  color: var(--danger);
+  .icon-btn--danger:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+  }
 }
 
 /* ========================================
@@ -469,13 +476,16 @@ body {
   font-size: 0.875rem;
   cursor: pointer;
   min-height: 72px;
-  transition: all 0.12s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
   user-select: none;
+  touch-action: manipulation;
 }
 
-.activity-btn:hover:not(:disabled) {
-  transform: scale(1.03);
-  box-shadow: var(--shadow-md);
+@media (hover: hover) {
+  .activity-btn:hover:not(:disabled) {
+    transform: scale(1.03);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .activity-btn:active:not(:disabled) {
@@ -1092,9 +1102,10 @@ body {
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   color: #fff;
   user-select: none;
+  touch-action: manipulation;
 }
 
 .measure-action-btn:disabled {
@@ -1106,15 +1117,18 @@ body {
 .measure-action-btn--start {
   background: var(--success);
 }
-.measure-action-btn--start:hover:not(:disabled) {
-  background: var(--success-hover);
-}
 
 .measure-action-btn--stop {
   background: var(--danger);
 }
-.measure-action-btn--stop:hover:not(:disabled) {
-  background: var(--danger-hover);
+
+@media (hover: hover) {
+  .measure-action-btn--start:hover:not(:disabled) {
+    background: var(--success-hover);
+  }
+  .measure-action-btn--stop:hover:not(:disabled) {
+    background: var(--danger-hover);
+  }
 }
 
 /* --- Body: chart + pad, NO SCROLL --- */
