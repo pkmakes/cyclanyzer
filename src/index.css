@@ -427,6 +427,7 @@ body {
 
 .cycle-controls__buttons .btn {
   flex: 1;
+  min-width: 0;
 }
 
 .cycle-controls__hint {
@@ -1410,4 +1411,91 @@ body {
    ======================================== */
 .recharts-cartesian-axis-tick-value {
   fill: var(--text-muted);
+}
+
+/* ========================================
+   MOBILE PORTRAIT (<= 600px)
+   ======================================== */
+@media (max-width: 600px) {
+  /* --- Padding reduzieren: mehr Platz auf engem Bildschirm --- */
+  .app-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .app-main {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+
+  .panel__title {
+    padding: var(--space-sm) var(--space-md) 0;
+  }
+
+  .panel__body {
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+  }
+
+  .panel--chart .panel__body {
+    padding: var(--space-xs) var(--space-sm) var(--space-sm);
+  }
+
+  /* --- Touch-Targets: Minimum 44px Höhe --- */
+  .btn--sm {
+    padding: 10px 16px;
+  }
+
+  .btn--md {
+    padding: 12px 20px;
+  }
+
+  .icon-btn {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* --- Zyklussteuerung: Buttons stapeln --- */
+  .cycle-controls__buttons {
+    flex-direction: column;
+  }
+
+  /* --- Stats-Grid: 2 Spalten statt 3 --- */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* --- Chart: Höhe reduzieren --- */
+  .cycle-chart {
+    min-height: 240px;
+  }
+
+  .cycle-chart .recharts-responsive-container {
+    max-height: 240px;
+  }
+
+  /* --- Dialoge: viewport-sicher --- */
+  .modal-overlay {
+    padding: var(--space-sm);
+  }
+
+  .modal-content {
+    padding: var(--space-md);
+    max-width: calc(100vw - 32px);
+  }
+
+  .confirm-dialog {
+    max-width: calc(100vw - 32px);
+    padding: var(--space-lg);
+  }
+
+  .final-segment-dialog {
+    max-width: calc(100vw - 32px);
+  }
+
+  /* --- App-Titel etwas kleiner --- */
+  .app-title {
+    font-size: 1.25rem;
+  }
 }
