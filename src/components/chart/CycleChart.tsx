@@ -11,8 +11,7 @@ import {
   Cell,
 } from 'recharts';
 import type { CycleMeasurement, ActivityType } from '../../types/domain';
-import { UNASSIGNED_COLOR, UNASSIGNED_KEY, UNASSIGNED_LABEL } from '../../types/domain';
-import { buildChartData, getActivityKeys } from '../../state/selectors';
+import { buildChartData, getActivityKeys, getMaxSegments } from '../../state/selectors';
 import { msToSeconds } from '../../utils/time';
 import { EmptyState } from '../common/EmptyState';
 import { CycleChartTooltip } from './CycleChartTooltip';
@@ -29,6 +28,7 @@ type CycleChartProps = {
 export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTypes, fillHeight }: CycleChartProps) {
   const chartData = buildChartData(cycles, previewCycle);
   const activityKeys = getActivityKeys(cycles, previewCycle);
+  const maxSegs = getMaxSegments(chartData);
 
   if (chartData.length === 0) {
     return (
@@ -39,37 +39,6 @@ export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTy
         />
       </div>
     );
-  }
-
-  // Build stack keys: use activity type IDs + unassigned key
-  const stackKeys = activityKeys.map((ak) => ({
-    key: ak.key,
-    label: ak.label,
-    color: ak.color,
-  }));
-
-  // Ensure unassigned is in the stack
-  const hasUnassigned = stackKeys.some((sk) => sk.key === UNASSIGNED_KEY);
-  if (!hasUnassigned) {
-    // Check if any data has unassigned
-    const needsUnassigned = chartData.some((d) => UNASSIGNED_KEY in d);
-    if (needsUnassigned) {
-      stackKeys.push({ key: UNASSIGNED_KEY, label: UNASSIGNED_LABEL, color: UNASSIGNED_COLOR });
-    }
-  }
-
-  // Also include activity type IDs that might appear in the live preview
-  const liveTrailingKey = '__unassigned__';
-  const hasLiveTrailing = chartData.some((d) => liveTrailingKey in d && d[liveTrailingKey] !== UNASSIGNED_KEY);
-
-  // For activity types, add from the config if not yet in stack
-  for (const at of activityTypes) {
-    if (!stackKeys.some((sk) => sk.key === at.id)) {
-      const usedInData = chartData.some((d) => at.id in d);
-      if (usedInData) {
-        stackKeys.push({ key: at.id, label: at.label, color: at.color });
-      }
-    }
   }
 
   const targetSeconds = targetCycleTimeMs ? msToSeconds(targetCycleTimeMs) : undefined;
@@ -85,21 +54,25 @@ export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTy
             tick={{ fontSize: 12 }}
           />
           <Tooltip content={<CycleChartTooltip />} />
-          <Legend
-            formatter={(value: string) => {
-              const found = stackKeys.find((sk) => sk.key === value);
-              return found ? found.label : value;
-            }}
-          />
+          <Legend content={() => <ChartLegend items={activityKeys} />} />
 
-          {stackKeys.map((sk) => (
-            <Bar key={sk.key} dataKey={sk.key} stackId="segments" name={sk.label} fill={sk.color}>
-              {chartData.map((entry, idx) => (
-                <Cell
-                  key={idx}
-                  opacity={entry.isPreview ? 0.6 : 1}
-                />
-              ))}
+          {Array.from({ length: maxSegs }, (_, i) => (
+            <Bar
+              key={`seg_${i}`}
+              dataKey={`seg_${i}`}
+              stackId="segments"
+              isAnimationActive={false}
+            >
+              {chartData.map((entry, rowIdx) => {
+                const meta = entry._meta[i];
+                return (
+                  <Cell
+                    key={rowIdx}
+                    fill={meta?.color ?? 'transparent'}
+                    opacity={entry.isPreview ? 0.6 : 1}
+                  />
+                );
+              })}
             </Bar>
           ))}
 
@@ -120,6 +93,20 @@ export function CycleChart({ cycles, previewCycle, targetCycleTimeMs, activityTy
           )}
         </BarChart>
       </ResponsiveContainer>
+    </div>
+  );
+}
+
+function ChartLegend({ items }: { items: { key: string; label: string; color: string }[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="chart-legend">
+      {items.map((item) => (
+        <div key={item.key} className="chart-legend__item">
+          <span className="chart-legend__swatch" style={{ backgroundColor: item.color }} />
+          <span>{item.label}</span>
+        </div>
+      ))}
     </div>
   );
 }

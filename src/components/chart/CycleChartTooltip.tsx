@@ -1,6 +1,6 @@
 import type { TooltipProps } from 'recharts';
 import { formatPercent, formatSeconds } from '../../utils/format';
-import { UNASSIGNED_KEY } from '../../types/domain';
+import type { SegmentChartMeta } from '../../types/domain';
 
 type PayloadEntry = {
   dataKey: string;
@@ -12,6 +12,7 @@ type PayloadEntry = {
 type CustomPayload = {
   totalSeconds?: number;
   isPreview?: boolean;
+  _meta?: SegmentChartMeta[];
 };
 
 export function CycleChartTooltip({ active, payload, label }: TooltipProps<number, string>) {
@@ -19,7 +20,7 @@ export function CycleChartTooltip({ active, payload, label }: TooltipProps<numbe
 
   const data = (payload[0]?.payload ?? {}) as CustomPayload;
   const entries = payload as unknown as PayloadEntry[];
-
+  const meta = data._meta ?? [];
   const total = data.totalSeconds ?? 0;
 
   return (
@@ -32,14 +33,16 @@ export function CycleChartTooltip({ active, payload, label }: TooltipProps<numbe
         {entries
           .filter((e) => e.value > 0)
           .map((entry) => {
+            const segIndex = parseInt(entry.dataKey.replace('seg_', ''), 10);
+            const segMeta = meta[segIndex];
             const pct = total > 0 ? (entry.value / total) * 100 : 0;
             return (
               <li key={entry.dataKey} className="chart-tooltip__item">
                 <span
                   className="chart-tooltip__swatch"
-                  style={{ backgroundColor: entry.color }}
+                  style={{ backgroundColor: segMeta?.color ?? entry.color }}
                 />
-                <span>{entry.dataKey === UNASSIGNED_KEY ? entry.name : entry.name}</span>
+                <span>{segMeta?.label ?? entry.dataKey}</span>
                 <span className="chart-tooltip__value">
                   {formatSeconds(entry.value)} ({formatPercent(pct)})
                 </span>

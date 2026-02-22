@@ -8,7 +8,10 @@ import {
 } from '../utils/cycleSegmentation';
 import { now } from '../utils/time';
 
-const TICK_INTERVAL_MS = 50;
+/** Fast tick for the timer display (ms) */
+const TIMER_TICK_MS = 50;
+/** Slower tick for chart preview updates (ms) – 2 updates/second is enough visually */
+const CHART_UPDATE_MS = 500;
 
 type UseCycleTimerReturn = {
   activeCycle: ActiveCycleState;
@@ -45,10 +48,12 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
   }, []);
 
   const start = useCallback(() => {
-    const cycle = startActiveCycle(now());
+    const t = now();
+    const cycle = startActiveCycle(t);
     setActiveCycle(cycle);
     setElapsedMs(0);
-  }, []);
+    setPreviewCycle(buildLivePreviewCycle(cycle, t, nextCycleNumber));
+  }, [nextCycleNumber]);
 
   const freeze = useCallback((): number => {
     clearTick();
@@ -89,14 +94,19 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
     []
   );
 
-  // Tick loop for live elapsed time and preview
   useEffect(() => {
     if (activeCycle.isRunning && activeCycle.startedAt !== undefined) {
+      let lastChartUpdate = 0;
+
       intervalRef.current = setInterval(() => {
-        const currentNow = now();
-        setElapsedMs(currentNow - activeCycle.startedAt!);
-        setPreviewCycle(buildLivePreviewCycle(activeCycle, currentNow, nextCycleNumber));
-      }, TICK_INTERVAL_MS);
+        const t = now();
+        setElapsedMs(t - activeCycle.startedAt!);
+
+        if (lastChartUpdate === 0 || t - lastChartUpdate >= CHART_UPDATE_MS) {
+          setPreviewCycle(buildLivePreviewCycle(activeCycle, t, nextCycleNumber));
+          lastChartUpdate = t;
+        }
+      }, TIMER_TICK_MS);
     } else {
       clearTick();
     }

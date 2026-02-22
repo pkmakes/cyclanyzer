@@ -1196,6 +1196,7 @@ body {
 .cycle-chart--fill {
   position: absolute;
   inset: var(--space-xs);
+  min-height: 0;
 }
 
 /* --- Activity Pad: adaptive columns, max 2 rows in portrait --- */
@@ -1418,13 +1419,34 @@ body {
 }
 
 /* ========================================
+   CHART LEGEND (custom, replaces Recharts default)
+   ======================================== */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.chart-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+
+.chart-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ========================================
    RECHARTS OVERRIDES
    ======================================== */
 .recharts-cartesian-axis-tick-value {
   fill: var(--text-muted);
-}
-
-.recharts-legend-item-text {
-  font-size: 0.75rem !important;
-  color: var(--text) !important;
 }

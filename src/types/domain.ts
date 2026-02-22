@@ -58,13 +58,20 @@ export type ExportData = {
   state: AppState;
 };
 
+/** Metadata for a single segment slot in chart data */
+export type SegmentChartMeta = {
+  color: string;
+  label: string;
+};
+
 /** Chart data row – one per cycle/preview bar */
 export type ChartDataRow = {
   label: string;
   cycleNumber: number;
   isPreview: boolean;
   totalSeconds: number;
-  [activityKey: string]: string | number | boolean;
+  _meta: SegmentChartMeta[];
+  [segKey: string]: string | number | boolean | SegmentChartMeta[];
 };
 
 export const UNASSIGNED_KEY = '__unassigned__';

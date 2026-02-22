@@ -1,4 +1,4 @@
-import type { AppState, ChartDataRow, CycleMeasurement } from '../types/domain';
+import type { AppState, ChartDataRow, CycleMeasurement, SegmentChartMeta } from '../types/domain';
 import { UNASSIGNED_COLOR, UNASSIGNED_KEY, UNASSIGNED_LABEL } from '../types/domain';
 import { msToSeconds } from '../utils/time';
 
@@ -8,7 +8,7 @@ export function getNextCycleNumber(state: AppState): number {
   return Math.max(...state.cycles.map((c) => c.cycleNumber)) + 1;
 }
 
-/** Get all unique activity keys used across cycles (for chart stacking) */
+/** Get all unique activity keys used across cycles (for chart legend) */
 export function getActivityKeys(
   cycles: CycleMeasurement[],
   previewCycle?: CycleMeasurement | null
@@ -38,7 +38,8 @@ export function getActivityKeys(
 
 /**
  * Build chart data rows from cycles.
- * Each row has a dynamic key per activity, holding the duration in seconds.
+ * Segments are stored chronologically: seg_0, seg_1, … (not grouped by activity).
+ * Metadata per segment slot is stored in _meta.
  */
 export function buildChartData(
   cycles: CycleMeasurement[],
@@ -47,6 +48,7 @@ export function buildChartData(
   const allCycles = previewCycle ? [...cycles, previewCycle] : cycles;
 
   return allCycles.map((cycle) => {
+    const meta: SegmentChartMeta[] = [];
     const row: ChartDataRow = {
       label: cycle.note
         ? `Zyklus ${cycle.cycleNumber} ${cycle.note}`
@@ -54,19 +56,22 @@ export function buildChartData(
       cycleNumber: cycle.cycleNumber,
       isPreview: cycle.id === 'live-preview',
       totalSeconds: msToSeconds(cycle.totalDurationMs),
+      _meta: meta,
     };
 
-    // Aggregate segment durations by activity key
-    const durations = new Map<string, number>();
-    for (const seg of cycle.segments) {
-      const key = seg.activityTypeId ?? UNASSIGNED_KEY;
-      durations.set(key, (durations.get(key) ?? 0) + msToSeconds(seg.durationMs));
-    }
-
-    for (const [key, seconds] of durations) {
-      row[key] = Math.round(seconds * 100) / 100;
-    }
+    cycle.segments.forEach((seg, i) => {
+      row[`seg_${i}`] = Math.round(msToSeconds(seg.durationMs) * 100) / 100;
+      meta.push({
+        color: seg.color ?? UNASSIGNED_COLOR,
+        label: seg.activityLabel ?? UNASSIGNED_LABEL,
+      });
+    });
 
     return row;
   });
+}
+
+/** Maximum number of segments across all rows in chart data */
+export function getMaxSegments(chartData: ChartDataRow[]): number {
+  return chartData.reduce((max, row) => Math.max(max, row._meta.length), 0);
 }
