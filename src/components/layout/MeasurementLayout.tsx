@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { formatMs } from '../../utils/time';
+import { Button } from '../common/Button';
 
 type MeasurementLayoutProps = {
   isRunning: boolean;
@@ -27,9 +28,9 @@ export function MeasurementLayout({
       {/* Header – minimal, same style as dashboard */}
       <div className="measure-header">
         <span className="measure-header__title">Cyclanyzer</span>
-        <button className="measure-header__exit" onClick={onExitMeasureMode} title="Zum Dashboard wechseln">
+        <Button variant="ghost" size="sm" onClick={onExitMeasureMode} title="Zum Dashboard wechseln">
           ◳ Dashboard
-        </button>
+        </Button>
       </div>
 
       {/* Timer zone – status, time, start/stop */}

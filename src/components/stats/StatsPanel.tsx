@@ -44,6 +44,12 @@ export function StatsPanel({ cycles }: StatsPanelProps) {
           <span className="stat-card__label">Max</span>
           <span className="stat-card__value">{formatMs(stats.max)}</span>
         </div>
+        {stats.bestRepeatable !== null && (
+          <div className="stat-card">
+            <span className="stat-card__label">Beste Whb. Zeit</span>
+            <span className="stat-card__value">{formatMs(stats.bestRepeatable)}</span>
+          </div>
+        )}
       </div>
 
       <ActivityShareTable shares={shares} />

@@ -116,25 +116,6 @@ body {
   flex-wrap: wrap;
 }
 
-.mode-toggle {
-  background: var(--primary-light);
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-sm);
-  padding: 6px 14px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  font-family: var(--font);
-  color: var(--primary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.mode-toggle:hover {
-  background: var(--primary);
-  color: #fff;
-}
-
 .app-main {
   flex: 1;
   max-width: 1600px;
@@ -1038,44 +1019,25 @@ body {
   height: 100dvh;
 }
 
-/* --- Header (slim, matching dashboard) --- */
+/* --- Header (matching dashboard app-header) --- */
 .measure-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm) var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
-  height: 44px;
 }
 
 .measure-header__title {
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: -0.02em;
 }
 
-.measure-header__exit {
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 4px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  font-family: var(--font);
-  color: var(--text-muted);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-}
-
-.measure-header__exit:hover {
-  background: var(--border);
-  color: var(--text);
-}
 
 /* --- Timer zone --- */
 .measure-timer {
@@ -1358,7 +1320,6 @@ body {
 /* --- Very small heights (landscape phone): ultra-compact --- */
 @media (max-height: 450px) {
   .measure-header {
-    height: 36px;
     padding: var(--space-xs) var(--space-md);
   }
 

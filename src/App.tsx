@@ -20,6 +20,7 @@ import { CycleChart } from './components/chart/CycleChart';
 import { CycleTable } from './components/cycles/CycleTable';
 import { StatsPanel } from './components/stats/StatsPanel';
 import { ToastContainer, type ToastMessage } from './components/common/Toast';
+import { Button } from './components/common/Button';
 
 function getInitialState(): AppState {
   return loadFromLocalStorage() ?? initialAppState;
@@ -164,19 +165,20 @@ export default function App() {
     <div className="header-content">
       <h1 className="app-title">Cyclanyzer</h1>
       <div className="header-actions">
-        <button
-          className="mode-toggle"
-          onClick={() => setMeasureMode((prev) => !prev)}
-          title={measureMode ? 'Zum Dashboard wechseln' : 'Zum Messmodus wechseln'}
-        >
-          {measureMode ? '◳ Dashboard' : '◱ Messmodus'}
-        </button>
         <ImportExportControls
           state={state}
           onImport={handleImport}
           onError={(msg) => addToast(msg, 'error')}
           onSuccess={(msg) => addToast(msg, 'success')}
         />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setMeasureMode((prev) => !prev)}
+          title={measureMode ? 'Zum Dashboard wechseln' : 'Zum Messmodus wechseln'}
+        >
+          {measureMode ? '◳ Dashboard' : '◱ Messmodus'}
+        </Button>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ export type CycleStats = {
   median: number;
   min: number;
   max: number;
+  bestRepeatable: number | null;
   totalDurationMs: number;
 };
 
@@ -36,6 +37,7 @@ export function computeCycleStats(cycles: CycleMeasurement[]): CycleStats | null
     median,
     min: durations[0],
     max: durations[durations.length - 1],
+    bestRepeatable: durations.length >= 2 ? durations[1] : null,
     totalDurationMs,
   };
 }

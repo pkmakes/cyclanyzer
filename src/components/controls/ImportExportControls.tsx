@@ -1,6 +1,7 @@
 import type { AppState } from '../../types/domain';
 import { exportAsJson, readJsonFile } from '../../utils/exportImport';
-import { exportCyclesCsv, exportSegmentsCsv } from '../../utils/csv';
+import { exportSegmentsCsv } from '../../utils/csv';
+import { exportChartAsPng } from '../../utils/exportChart';
 import { validateImportData } from '../../utils/validation';
 import { Button } from '../common/Button';
 import { FileInput } from '../common/FileInput';
@@ -31,16 +32,16 @@ export function ImportExportControls({ state, onImport, onError, onSuccess }: Im
   return (
     <div className="import-export-controls">
       <Button variant="ghost" size="sm" onClick={() => exportAsJson(state)}>
-        JSON Export
+        Speichern
       </Button>
-      <FileInput label="JSON Import" accept=".json" onFile={handleImport} />
+      <FileInput label="Laden" accept=".json" onFile={handleImport} />
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => exportCyclesCsv(state.cycles)}
+        onClick={() => exportChartAsPng()}
         disabled={state.cycles.length === 0}
       >
-        CSV Zyklen
+        Export Diagramm
       </Button>
       <Button
         variant="ghost"
@@ -48,7 +49,7 @@ export function ImportExportControls({ state, onImport, onError, onSuccess }: Im
         onClick={() => exportSegmentsCsv(state.cycles)}
         disabled={state.cycles.length === 0}
       >
-        CSV Segmente
+        Export CSV
       </Button>
     </div>
   );
