@@ -44,7 +44,7 @@ export default function App() {
   }, [state, markDirty]);
 
   const nextCycleNumber = getNextCycleNumber(state);
-  const { activeCycle, elapsedMs, previewCycle, start, freeze, finalize, stop, markActivity } = useCycleTimer(nextCycleNumber);
+  const { activeCycle, previewCycle, start, freeze, finalize, stop, markActivity } = useCycleTimer(nextCycleNumber);
 
   // Pending-stop state: timer is frozen, waiting for final segment activity choice
   const [pendingStopTimestamp, setPendingStopTimestamp] = useState<number | null>(null);
@@ -233,7 +233,7 @@ export default function App() {
       <Panel title="Zyklussteuerung" className="panel--controls">
         <CycleControls
           isRunning={activeCycle.isRunning}
-          elapsedMs={elapsedMs}
+          startedAt={activeCycle.startedAt}
           onStart={handleStart}
           onStop={handleStop}
         />
@@ -267,7 +267,7 @@ export default function App() {
       {showMeasureMode && (
         <MeasurementLayout
           isRunning={activeCycle.isRunning}
-          elapsedMs={elapsedMs}
+          startedAt={activeCycle.startedAt}
           activityCount={state.activityTypes.length}
           onStart={handleStart}
           onStop={handleStop}

@@ -8,14 +8,11 @@ import {
 } from '../utils/cycleSegmentation';
 import { now } from '../utils/time';
 
-/** Fast tick for the timer display (ms) */
-const TIMER_TICK_MS = 50;
-/** Slower tick for chart preview updates (ms) – 2 updates/second is enough visually */
+/** Tick for chart preview updates (ms) – 2 updates/second is enough visually */
 const CHART_UPDATE_MS = 500;
 
 type UseCycleTimerReturn = {
   activeCycle: ActiveCycleState;
-  elapsedMs: number;
   previewCycle: CycleMeasurement | null;
   start: () => void;
   /** Freeze the timer and return the stop timestamp (used for pending-stop flow) */
@@ -36,7 +33,6 @@ const IDLE_STATE: ActiveCycleState = {
 
 export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
   const [activeCycle, setActiveCycle] = useState<ActiveCycleState>(IDLE_STATE);
-  const [elapsedMs, setElapsedMs] = useState(0);
   const [previewCycle, setPreviewCycle] = useState<CycleMeasurement | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -51,7 +47,6 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
     const t = now();
     const cycle = startActiveCycle(t);
     setActiveCycle(cycle);
-    setElapsedMs(0);
     setPreviewCycle(buildLivePreviewCycle(cycle, t, nextCycleNumber));
   }, [nextCycleNumber]);
 
@@ -64,7 +59,6 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
     (cycleNumber: number, stopTimestamp: number, finalActivity?: ActivityType): CycleMeasurement | null => {
       const result = stopActiveCycle(activeCycle, stopTimestamp, cycleNumber, finalActivity);
       setActiveCycle(IDLE_STATE);
-      setElapsedMs(0);
       setPreviewCycle(null);
       return result;
     },
@@ -77,7 +71,6 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
       clearTick();
       const result = stopActiveCycle(activeCycle, ts, cycleNumber, finalActivity);
       setActiveCycle(IDLE_STATE);
-      setElapsedMs(0);
       setPreviewCycle(null);
       return result;
     },
@@ -96,17 +89,10 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
 
   useEffect(() => {
     if (activeCycle.isRunning && activeCycle.startedAt !== undefined) {
-      let lastChartUpdate = 0;
-
       intervalRef.current = setInterval(() => {
         const t = now();
-        setElapsedMs(t - activeCycle.startedAt!);
-
-        if (lastChartUpdate === 0 || t - lastChartUpdate >= CHART_UPDATE_MS) {
-          setPreviewCycle(buildLivePreviewCycle(activeCycle, t, nextCycleNumber));
-          lastChartUpdate = t;
-        }
-      }, TIMER_TICK_MS);
+        setPreviewCycle(buildLivePreviewCycle(activeCycle, t, nextCycleNumber));
+      }, CHART_UPDATE_MS);
     } else {
       clearTick();
     }
@@ -114,5 +100,5 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
     return clearTick;
   }, [activeCycle, nextCycleNumber, clearTick]);
 
-  return { activeCycle, elapsedMs, previewCycle, start, freeze, finalize, stop, markActivity };
+  return { activeCycle, previewCycle, start, freeze, finalize, stop, markActivity };
 }

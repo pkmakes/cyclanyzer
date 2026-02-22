@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import { formatMs } from '../../utils/time';
 import { Button } from '../common/Button';
+import { TimerDisplay } from '../common/TimerDisplay';
 
 type MeasurementLayoutProps = {
   isRunning: boolean;
-  elapsedMs: number;
+  startedAt: number | undefined;
   activityCount: number;
   onStart: () => void;
   onStop: () => void;
@@ -15,7 +15,7 @@ type MeasurementLayoutProps = {
 
 export function MeasurementLayout({
   isRunning,
-  elapsedMs,
+  startedAt,
   activityCount,
   onStart,
   onStop,
@@ -38,7 +38,7 @@ export function MeasurementLayout({
         <span className={`measure-timer__status ${isRunning ? '' : 'measure-timer__status--idle'}`}>
           {isRunning ? '● Messung läuft' : '○ Bereit'}
         </span>
-        <span className="measure-timer__display">{formatMs(elapsedMs, 1)}</span>
+        <TimerDisplay startedAt={startedAt} className="measure-timer__display" />
         <div className="measure-timer__actions">
           <button
             className="measure-action-btn measure-action-btn--start"

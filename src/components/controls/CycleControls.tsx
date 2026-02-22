@@ -1,14 +1,14 @@
 import { Button } from '../common/Button';
-import { formatMs } from '../../utils/time';
+import { TimerDisplay } from '../common/TimerDisplay';
 
 type CycleControlsProps = {
   isRunning: boolean;
-  elapsedMs: number;
+  startedAt: number | undefined;
   onStart: () => void;
   onStop: () => void;
 };
 
-export function CycleControls({ isRunning, elapsedMs, onStart, onStop }: CycleControlsProps) {
+export function CycleControls({ isRunning, startedAt, onStart, onStop }: CycleControlsProps) {
   return (
     <div className="cycle-controls">
       <div className="cycle-controls__status">
@@ -18,7 +18,7 @@ export function CycleControls({ isRunning, elapsedMs, onStart, onStop }: CycleCo
       </div>
 
       <div className="cycle-controls__timer">
-        <span className="timer-display">{formatMs(elapsedMs, 1)}</span>
+        <TimerDisplay startedAt={startedAt} />
       </div>
 
       <div className="cycle-controls__buttons">
