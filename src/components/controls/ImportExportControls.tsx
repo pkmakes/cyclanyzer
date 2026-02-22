@@ -11,15 +11,17 @@ type ImportExportControlsProps = {
   onImport: (state: AppState) => void;
   onError: (message: string) => void;
   onSuccess: (message: string) => void;
+  onSaved?: () => void;
 };
 
-export function ImportExportControls({ state, onImport, onError, onSuccess }: ImportExportControlsProps) {
+export function ImportExportControls({ state, onImport, onError, onSuccess, onSaved }: ImportExportControlsProps) {
   async function handleImport(file: File) {
     try {
       const raw = await readJsonFile(file);
       const result = validateImportData(raw);
       if (result.valid && result.state) {
         onImport(result.state);
+        onSaved?.();
         onSuccess('Daten erfolgreich importiert.');
       } else {
         onError(result.error ?? 'Unbekannter Importfehler.');
@@ -31,7 +33,7 @@ export function ImportExportControls({ state, onImport, onError, onSuccess }: Im
 
   return (
     <div className="import-export-controls">
-      <Button variant="ghost" size="sm" onClick={() => exportAsJson(state)}>
+      <Button variant="ghost" size="sm" onClick={() => { exportAsJson(state); onSaved?.(); }}>
         Speichern
       </Button>
       <FileInput label="Laden" accept=".json" onFile={handleImport} />

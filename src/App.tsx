@@ -1,4 +1,4 @@
-import { useCallback, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActivityType, AppState, CycleSegment } from './types/domain';
 import { FinalSegmentDialog } from './components/controls/FinalSegmentDialog';
@@ -8,6 +8,7 @@ import { getNextCycleNumber } from './state/selectors';
 import { useCycleTimer } from './hooks/useCycleTimer';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { loadFromLocalStorage, useLocalStorageSync } from './hooks/useLocalStorageSync';
+import { useBeforeUnloadWarning } from './hooks/useBeforeUnloadWarning';
 import { AppLayout } from './components/layout/AppLayout';
 import { MeasurementLayout } from './components/layout/MeasurementLayout';
 import { Panel } from './components/layout/Panel';
@@ -29,8 +30,18 @@ function getInitialState(): AppState {
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, getInitialState);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const { markDirty, markClean } = useBeforeUnloadWarning();
 
   useLocalStorageSync(state);
+
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    markDirty();
+  }, [state, markDirty]);
 
   const nextCycleNumber = getNextCycleNumber(state);
   const { activeCycle, elapsedMs, previewCycle, start, freeze, finalize, stop, markActivity } = useCycleTimer(nextCycleNumber);
@@ -170,6 +181,7 @@ export default function App() {
           onImport={handleImport}
           onError={(msg) => addToast(msg, 'error')}
           onSuccess={(msg) => addToast(msg, 'success')}
+          onSaved={markClean}
         />
         <Button
           variant="ghost"

@@ -105,7 +105,7 @@ body {
 .app-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary);
+  color: #5eb2b2;
   letter-spacing: -0.02em;
 }
 
@@ -1035,7 +1035,7 @@ body {
 .measure-header__title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary);
+  color: #5eb2b2;
   letter-spacing: -0.02em;
 }
 
