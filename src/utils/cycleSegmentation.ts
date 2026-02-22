@@ -58,14 +58,14 @@ export function registerActivityClick(
 /**
  * Stop the active cycle and produce a finalized CycleMeasurement.
  *
- * IMPORTANT: The time from the last activity click until Stop is stored
- * as "unassigned" (Nicht zugeordnet). This is the standard MVP behavior
- * to avoid silently mis-attributing the final segment.
+ * The final segment (from last activity click until Stop) is assigned to
+ * `finalSegmentActivity` if provided, otherwise stored as "unassigned".
  */
 export function stopActiveCycle(
   activeCycle: ActiveCycleState,
   nowMs: number,
-  cycleNumber: number
+  cycleNumber: number,
+  finalSegmentActivity?: ActivityType
 ): CycleMeasurement | null {
   if (!activeCycle.isRunning || activeCycle.startedAt === undefined || activeCycle.lastMarkAt === undefined) {
     return null;
@@ -74,16 +74,15 @@ export function stopActiveCycle(
   const totalDurationMs = nowMs - activeCycle.startedAt;
   const segments = [...activeCycle.provisionalSegments];
 
-  // Add the remaining segment from last click to stop as "unassigned"
   const remainingStartOffset = activeCycle.lastMarkAt - activeCycle.startedAt;
   const remainingDuration = totalDurationMs - remainingStartOffset;
 
   if (remainingDuration >= MIN_SEGMENT_DURATION_MS) {
     segments.push({
       id: uuidv4(),
-      activityTypeId: undefined,
-      activityLabel: UNASSIGNED_LABEL,
-      color: UNASSIGNED_COLOR,
+      activityTypeId: finalSegmentActivity?.id,
+      activityLabel: finalSegmentActivity?.label ?? UNASSIGNED_LABEL,
+      color: finalSegmentActivity?.color ?? UNASSIGNED_COLOR,
       durationMs: remainingDuration,
       startOffsetMs: remainingStartOffset,
       endOffsetMs: totalDurationMs,

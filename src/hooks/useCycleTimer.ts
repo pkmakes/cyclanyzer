@@ -15,7 +15,12 @@ type UseCycleTimerReturn = {
   elapsedMs: number;
   previewCycle: CycleMeasurement | null;
   start: () => void;
-  stop: (cycleNumber: number) => CycleMeasurement | null;
+  /** Freeze the timer and return the stop timestamp (used for pending-stop flow) */
+  freeze: () => number;
+  /** Finalize a frozen cycle with an optional activity for the last segment */
+  finalize: (cycleNumber: number, stopTimestamp: number, finalActivity?: ActivityType) => CycleMeasurement | null;
+  /** Convenience: stop immediately without pending dialog */
+  stop: (cycleNumber: number, finalActivity?: ActivityType) => CycleMeasurement | null;
   markActivity: (activityType: ActivityType) => void;
 };
 
@@ -45,13 +50,30 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
     setElapsedMs(0);
   }, []);
 
-  const stop = useCallback(
-    (cycleNumber: number): CycleMeasurement | null => {
-      const result = stopActiveCycle(activeCycle, now(), cycleNumber);
+  const freeze = useCallback((): number => {
+    clearTick();
+    return now();
+  }, [clearTick]);
+
+  const finalize = useCallback(
+    (cycleNumber: number, stopTimestamp: number, finalActivity?: ActivityType): CycleMeasurement | null => {
+      const result = stopActiveCycle(activeCycle, stopTimestamp, cycleNumber, finalActivity);
       setActiveCycle(IDLE_STATE);
       setElapsedMs(0);
       setPreviewCycle(null);
+      return result;
+    },
+    [activeCycle]
+  );
+
+  const stop = useCallback(
+    (cycleNumber: number, finalActivity?: ActivityType): CycleMeasurement | null => {
+      const ts = now();
       clearTick();
+      const result = stopActiveCycle(activeCycle, ts, cycleNumber, finalActivity);
+      setActiveCycle(IDLE_STATE);
+      setElapsedMs(0);
+      setPreviewCycle(null);
       return result;
     },
     [activeCycle, clearTick]
@@ -82,5 +104,5 @@ export function useCycleTimer(nextCycleNumber: number): UseCycleTimerReturn {
     return clearTick;
   }, [activeCycle, nextCycleNumber, clearTick]);
 
-  return { activeCycle, elapsedMs, previewCycle, start, stop, markActivity };
+  return { activeCycle, elapsedMs, previewCycle, start, freeze, finalize, stop, markActivity };
 }

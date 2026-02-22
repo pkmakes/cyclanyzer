@@ -1,6 +1,7 @@
 import { useCallback, useReducer, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActivityType, AppState, CycleSegment } from './types/domain';
+import { FinalSegmentDialog } from './components/controls/FinalSegmentDialog';
 import { appReducer } from './state/appReducer';
 import { initialAppState } from './state/initialState';
 import { getNextCycleNumber } from './state/selectors';
@@ -30,7 +31,10 @@ export default function App() {
   useLocalStorageSync(state);
 
   const nextCycleNumber = getNextCycleNumber(state);
-  const { activeCycle, elapsedMs, previewCycle, start, stop, markActivity } = useCycleTimer(nextCycleNumber);
+  const { activeCycle, elapsedMs, previewCycle, start, freeze, finalize, stop, markActivity } = useCycleTimer(nextCycleNumber);
+
+  // Pending-stop state: timer is frozen, waiting for final segment activity choice
+  const [pendingStopTimestamp, setPendingStopTimestamp] = useState<number | null>(null);
 
   // Toast helpers
   const addToast = useCallback((text: string, type: ToastMessage['type']) => {
@@ -49,7 +53,25 @@ export default function App() {
 
   function handleStop() {
     if (!activeCycle.isRunning) return;
+
+    // If activity types are configured, freeze timer and ask for final segment
+    if (state.activityTypes.length > 0) {
+      const ts = freeze();
+      setPendingStopTimestamp(ts);
+      return;
+    }
+
+    // No activity types → finalize immediately
     const result = stop(nextCycleNumber);
+    if (result) {
+      dispatch({ type: 'ADD_CYCLE', payload: result });
+    }
+  }
+
+  function handleFinalSegmentChoice(activityType?: ActivityType) {
+    if (pendingStopTimestamp === null) return;
+    const result = finalize(nextCycleNumber, pendingStopTimestamp, activityType);
+    setPendingStopTimestamp(null);
     if (result) {
       dispatch({ type: 'ADD_CYCLE', payload: result });
     }
@@ -201,6 +223,12 @@ export default function App() {
     <>
       <AppLayout header={header} leftColumn={leftColumn} rightColumn={rightColumn} />
       <ToastContainer messages={toasts} onDismiss={dismissToast} />
+      {pendingStopTimestamp !== null && (
+        <FinalSegmentDialog
+          activityTypes={state.activityTypes}
+          onSelect={handleFinalSegmentChoice}
+        />
+      )}
     </>
   );
 }
