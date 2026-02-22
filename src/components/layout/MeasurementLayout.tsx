@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import { Button } from '../common/Button';
 import { formatMs } from '../../utils/time';
 
 type MeasurementLayoutProps = {
   isRunning: boolean;
   elapsedMs: number;
+  activityCount: number;
   onStart: () => void;
   onStop: () => void;
   onExitMeasureMode: () => void;
@@ -15,6 +15,7 @@ type MeasurementLayoutProps = {
 export function MeasurementLayout({
   isRunning,
   elapsedMs,
+  activityCount,
   onStart,
   onStop,
   onExitMeasureMode,
@@ -23,28 +24,40 @@ export function MeasurementLayout({
 }: MeasurementLayoutProps) {
   return (
     <div className="measure-layout">
-      <div className="measure-topbar">
-        <button className="measure-topbar__exit" onClick={onExitMeasureMode} title="Zum Dashboard wechseln">
+      {/* Header – minimal, same style as dashboard */}
+      <div className="measure-header">
+        <span className="measure-header__title">Cyclanyzer</span>
+        <button className="measure-header__exit" onClick={onExitMeasureMode} title="Zum Dashboard wechseln">
           ◳ Dashboard
         </button>
+      </div>
 
-        <span className={`measure-topbar__status ${isRunning ? '' : 'measure-topbar__status--idle'}`}>
+      {/* Timer zone – status, time, start/stop */}
+      <div className={`measure-timer ${isRunning ? 'measure-timer--running' : ''}`}>
+        <span className={`measure-timer__status ${isRunning ? '' : 'measure-timer__status--idle'}`}>
           {isRunning ? '● Messung läuft' : '○ Bereit'}
         </span>
-
-        <span className="measure-topbar__timer">{formatMs(elapsedMs, 1)}</span>
-
-        <div className="measure-topbar__actions">
-          <Button variant="success" size="lg" disabled={isRunning} onClick={onStart}>
+        <span className="measure-timer__display">{formatMs(elapsedMs, 1)}</span>
+        <div className="measure-timer__actions">
+          <button
+            className="measure-action-btn measure-action-btn--start"
+            disabled={isRunning}
+            onClick={onStart}
+          >
             ▶ Start
-          </Button>
-          <Button variant="danger" size="lg" disabled={!isRunning} onClick={onStop}>
+          </button>
+          <button
+            className="measure-action-btn measure-action-btn--stop"
+            disabled={!isRunning}
+            onClick={onStop}
+          >
             ■ Stop
-          </Button>
+          </button>
         </div>
       </div>
 
-      <div className="measure-body">
+      {/* Body – chart + activity pad, no scroll */}
+      <div className={`measure-body measure-body--cols-${activityCount}`}>
         <div className="measure-chart">{chart}</div>
         <div className="measure-pad">{activityPad}</div>
       </div>

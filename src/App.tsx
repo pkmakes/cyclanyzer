@@ -243,6 +243,7 @@ export default function App() {
         <MeasurementLayout
           isRunning={activeCycle.isRunning}
           elapsedMs={elapsedMs}
+          activityCount={state.activityTypes.length}
           onStart={handleStart}
           onStop={handleStop}
           onExitMeasureMode={() => setMeasureMode(false)}

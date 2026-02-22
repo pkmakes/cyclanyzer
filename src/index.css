@@ -1035,22 +1035,30 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  height: 100dvh;
 }
 
-/* --- Top bar --- */
-.measure-topbar {
+/* --- Header (slim, matching dashboard) --- */
+.measure-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
   padding: var(--space-sm) var(--space-lg);
   background: var(--surface);
-  border-bottom: 2px solid var(--success);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
   flex-shrink: 0;
-  min-height: 56px;
+  height: 44px;
 }
 
-.measure-topbar__exit {
+.measure-header__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+
+.measure-header__exit {
   background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1064,41 +1072,89 @@ body {
   transition: all 0.15s ease;
 }
 
-.measure-topbar__exit:hover {
+.measure-header__exit:hover {
   background: var(--border);
   color: var(--text);
 }
 
-.measure-topbar__status {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--success-hover);
-  animation: pulse-badge 1.5s ease-in-out infinite;
-  white-space: nowrap;
+/* --- Timer zone --- */
+.measure-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.measure-topbar__status--idle {
+.measure-timer--running {
+  border-bottom: 2px solid var(--success);
+}
+
+.measure-timer__status {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--success-hover);
+  animation: pulse-badge 1.5s ease-in-out infinite;
+}
+
+.measure-timer__status--idle {
   color: var(--text-muted);
   animation: none;
 }
 
-.measure-topbar__actions {
+.measure-timer__display {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.measure-timer__actions {
   display: flex;
   gap: var(--space-sm);
 }
 
-.measure-topbar__timer {
-  font-family: var(--font-mono);
-  font-size: 2rem;
+.measure-action-btn {
+  font-family: var(--font);
+  font-size: 0.875rem;
   font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.02em;
-  text-align: center;
-  flex: 1;
-  min-width: 0;
+  padding: 8px 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #fff;
+  user-select: none;
 }
 
-/* --- Body: chart + pad --- */
+.measure-action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.measure-action-btn--start {
+  background: var(--success);
+}
+.measure-action-btn--start:hover:not(:disabled) {
+  background: var(--success-hover);
+}
+
+.measure-action-btn--stop {
+  background: var(--danger);
+}
+.measure-action-btn--stop:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+
+/* --- Body: chart + pad, NO SCROLL --- */
 .measure-body {
   flex: 1;
   display: flex;
@@ -1110,45 +1166,85 @@ body {
 .measure-chart {
   flex: 1;
   min-height: 0;
-  padding: var(--space-sm);
+  padding: var(--space-xs);
   position: relative;
 }
 
 .measure-pad {
   flex-shrink: 0;
-  padding: var(--space-sm) var(--space-md) var(--space-md);
+  padding: var(--space-xs) var(--space-sm) var(--space-sm);
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
 
-/* In measurement mode, hide the info text to save space */
+/* Hide info text in measurement mode */
 .measure-pad .activity-pad__info {
   display: none;
 }
 
-/* In measurement mode, make activity buttons bigger */
+/* Hide empty-pad hint in measurement mode */
+.measure-pad .activity-pad--empty {
+  padding: var(--space-sm);
+}
+
+.measure-pad .activity-pad--empty .hint-text {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+/* Chart fill: absolute positioning for concrete pixel dimensions */
+.cycle-chart--fill {
+  position: absolute;
+  inset: var(--space-xs);
+}
+
+/* --- Activity Pad: adaptive columns, max 2 rows in portrait --- */
 .measure-pad .activity-pad__grid {
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 .measure-pad .activity-btn {
-  min-height: 64px;
-  font-size: 1rem;
+  min-height: 48px;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
 }
 
 .measure-pad .activity-btn__label {
-  font-size: 1rem;
+  font-size: 0.8125rem;
 }
 
-/* Chart fill mode: use absolute positioning so ResponsiveContainer gets concrete pixel dimensions */
-.cycle-chart--fill {
-  position: absolute;
-  inset: var(--space-sm);
+.measure-pad .activity-btn__shortcut {
+  font-size: 0.625rem;
 }
 
-/* --- Landscape: side-by-side --- */
-@media (orientation: landscape) and (max-height: 900px) {
+/*
+  Portrait column rules based on activityCount (via data attribute on .measure-body):
+  Goal: max 2 rows → columns = ceil(count / 2)
+*/
+.measure-body--cols-1 .measure-pad .activity-pad__grid { grid-template-columns: 1fr; }
+.measure-body--cols-2 .measure-pad .activity-pad__grid { grid-template-columns: 1fr 1fr; }
+.measure-body--cols-3 .measure-pad .activity-pad__grid { grid-template-columns: 1fr 1fr; }
+.measure-body--cols-4 .measure-pad .activity-pad__grid { grid-template-columns: 1fr 1fr; }
+.measure-body--cols-5 .measure-pad .activity-pad__grid { grid-template-columns: repeat(3, 1fr); }
+.measure-body--cols-6 .measure-pad .activity-pad__grid { grid-template-columns: repeat(3, 1fr); }
+.measure-body--cols-7 .measure-pad .activity-pad__grid { grid-template-columns: repeat(4, 1fr); }
+.measure-body--cols-8 .measure-pad .activity-pad__grid { grid-template-columns: repeat(4, 1fr); }
+.measure-body--cols-9 .measure-pad .activity-pad__grid { grid-template-columns: repeat(5, 1fr); }
+.measure-body--cols-10 .measure-pad .activity-pad__grid { grid-template-columns: repeat(5, 1fr); }
+
+/* --- Landscape: chart left, sidebar right --- */
+@media (orientation: landscape) {
+  .measure-timer {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-xs) var(--space-md);
+  }
+
+  .measure-timer__display {
+    font-size: 1.75rem;
+  }
+
   .measure-body {
     flex-direction: row;
   }
@@ -1159,69 +1255,138 @@ body {
   }
 
   .measure-pad {
-    width: 280px;
     flex-shrink: 0;
     border-top: none;
     border-left: 1px solid var(--border);
-    padding: var(--space-md);
-    overflow-y: auto;
+    padding: var(--space-sm);
+    display: flex;
+    align-items: stretch;
+  }
+
+  .measure-pad .activity-pad {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
   }
 
   .measure-pad .activity-pad__grid {
-    grid-template-columns: 1fr;
+    align-content: stretch;
   }
 
   .measure-pad .activity-btn {
-    min-height: 56px;
+    min-height: 0;
+    flex: 1;
+  }
+
+  /* Landscape sidebar: 1 column up to 5 buttons, 2 columns above */
+  .measure-body--cols-1 .measure-pad .activity-pad__grid,
+  .measure-body--cols-2 .measure-pad .activity-pad__grid,
+  .measure-body--cols-3 .measure-pad .activity-pad__grid,
+  .measure-body--cols-4 .measure-pad .activity-pad__grid,
+  .measure-body--cols-5 .measure-pad .activity-pad__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .measure-body--cols-6 .measure-pad .activity-pad__grid,
+  .measure-body--cols-7 .measure-pad .activity-pad__grid,
+  .measure-body--cols-8 .measure-pad .activity-pad__grid,
+  .measure-body--cols-9 .measure-pad .activity-pad__grid,
+  .measure-body--cols-10 .measure-pad .activity-pad__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Sidebar width: narrower for 1 col, wider for 2 cols */
+  .measure-body--cols-1 .measure-pad,
+  .measure-body--cols-2 .measure-pad,
+  .measure-body--cols-3 .measure-pad,
+  .measure-body--cols-4 .measure-pad,
+  .measure-body--cols-5 .measure-pad {
+    width: 160px;
+  }
+
+  .measure-body--cols-6 .measure-pad,
+  .measure-body--cols-7 .measure-pad,
+  .measure-body--cols-8 .measure-pad,
+  .measure-body--cols-9 .measure-pad,
+  .measure-body--cols-10 .measure-pad {
+    width: 280px;
   }
 }
 
-/* Landscape wide screens: wider pad */
-@media (orientation: landscape) and (min-width: 1200px) and (max-height: 900px) {
-  .measure-pad {
+/* --- Desktop landscape: more generous --- */
+@media (orientation: landscape) and (min-width: 1024px) {
+  .measure-timer__display {
+    font-size: 2.25rem;
+  }
+
+  .measure-action-btn {
+    padding: 10px 36px;
+    font-size: 1rem;
+  }
+
+  .measure-body--cols-1 .measure-pad,
+  .measure-body--cols-2 .measure-pad,
+  .measure-body--cols-3 .measure-pad,
+  .measure-body--cols-4 .measure-pad,
+  .measure-body--cols-5 .measure-pad {
+    width: 200px;
+  }
+
+  .measure-body--cols-6 .measure-pad,
+  .measure-body--cols-7 .measure-pad,
+  .measure-body--cols-8 .measure-pad,
+  .measure-body--cols-9 .measure-pad,
+  .measure-body--cols-10 .measure-pad {
     width: 340px;
   }
 
   .measure-pad .activity-pad__grid {
     grid-template-columns: 1fr 1fr;
   }
-}
-
-/* --- Portrait: stack with generous pad space --- */
-@media (orientation: portrait) {
-  .measure-topbar__timer {
-    font-size: 1.75rem;
-  }
-
-  .measure-chart {
-    flex: 1;
-  }
-
-  .measure-pad .activity-pad__grid {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  }
 
   .measure-pad .activity-btn {
-    min-height: 60px;
+    min-height: 52px;
     padding: var(--space-sm);
   }
+
+  .measure-pad .activity-btn__label {
+    font-size: 0.9375rem;
+  }
 }
 
-/* Very small heights: even more compact */
-@media (max-height: 600px) {
-  .measure-topbar {
+/* --- Very small heights (landscape phone): ultra-compact --- */
+@media (max-height: 450px) {
+  .measure-header {
+    height: 36px;
     padding: var(--space-xs) var(--space-md);
-    min-height: 44px;
   }
 
-  .measure-topbar__timer {
-    font-size: 1.5rem;
+  .measure-header__title {
+    font-size: 0.9375rem;
   }
 
-  .measure-pad .activity-btn {
-    min-height: 48px;
-    padding: var(--space-xs);
+  .measure-timer {
+    padding: 2px var(--space-md);
+    gap: var(--space-sm);
   }
+
+  .measure-timer__display {
+    font-size: 1.25rem;
+  }
+
+  .measure-timer__status {
+    font-size: 0.5625rem;
+  }
+
+  .measure-action-btn {
+    padding: 4px 16px;
+    font-size: 0.75rem;
+  }
+}
+
+/* --- No activity types: hide pad completely to give chart full space --- */
+.measure-body--cols-0 .measure-pad {
+  display: none;
 }
 
 /* ========================================
