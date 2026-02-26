@@ -22,6 +22,7 @@ import { CycleTable } from './components/cycles/CycleTable';
 import { StatsPanel } from './components/stats/StatsPanel';
 import { ToastContainer, type ToastMessage } from './components/common/Toast';
 import { Button } from './components/common/Button';
+import kisLogo from './assets/kis-logo.png';
 
 function getInitialState(): AppState {
   return loadFromLocalStorage() ?? initialAppState;
@@ -182,7 +183,13 @@ export default function App() {
 
   const header = (
     <div className="header-content">
-      <h1 className="app-title">Cyclanyzer</h1>
+      <div className="app-branding">
+        <img src={kisLogo} alt="Kautz Intelligent Solutions" className="app-branding__logo" />
+        <div className="app-branding__text">
+          <h1 className="app-title">Cyclanyzer</h1>
+          <span className="app-branding__subtitle">by kautz intelligent solutions</span>
+        </div>
+      </div>
       <div className="header-actions">
         <Button variant="ghost" size="sm" onClick={handleNew}>
           Neu

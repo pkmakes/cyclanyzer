@@ -103,11 +103,37 @@ body {
   flex-wrap: wrap;
 }
 
+.app-branding {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.app-branding__logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.app-branding__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
 .app-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #5eb2b2;
   letter-spacing: -0.02em;
+}
+
+.app-branding__subtitle {
+  font-size: 0.5625rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 3px;
 }
 
 .header-actions {
@@ -1505,8 +1531,17 @@ body {
     max-width: calc(100vw - 32px);
   }
 
-  /* --- App-Titel etwas kleiner --- */
+  /* --- Branding etwas kompakter --- */
+  .app-branding__logo {
+    width: 28px;
+    height: 28px;
+  }
+
   .app-title {
     font-size: 1.25rem;
+  }
+
+  .app-branding__subtitle {
+    font-size: 0.5rem;
   }
 }
