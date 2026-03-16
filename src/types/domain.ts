@@ -38,6 +38,7 @@ export type AppSettings = {
 };
 
 export type AppState = {
+  projectName: string;
   settings: AppSettings;
   activityTypes: ActivityType[];
   cycles: CycleMeasurement[];

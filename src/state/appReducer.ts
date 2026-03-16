@@ -1,6 +1,7 @@
 import type { ActivityType, AppState, CycleMeasurement, CycleSegment } from '../types/domain';
 
 export type AppAction =
+  | { type: 'SET_PROJECT_NAME'; payload: { name: string } }
   | { type: 'ADD_ACTIVITY_TYPE'; payload: ActivityType }
   | { type: 'UPDATE_ACTIVITY_TYPE'; payload: ActivityType }
   | { type: 'DELETE_ACTIVITY_TYPE'; payload: { id: string } }
@@ -16,6 +17,9 @@ export type AppAction =
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case 'SET_PROJECT_NAME':
+      return { ...state, projectName: action.payload.name };
+
     case 'ADD_ACTIVITY_TYPE':
       return {
         ...state,

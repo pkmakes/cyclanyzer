@@ -23,12 +23,21 @@ export function downloadFile(content: string, filename: string, mimeType: string
   URL.revokeObjectURL(url);
 }
 
+/** Sanitise a string for use in a filename */
+function sanitizeFilename(name: string): string {
+  return name
+    .replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '')
+    .replace(/\s+/g, '_')
+    .slice(0, 60);
+}
+
 /** Export the app state as a JSON file */
-export function exportAsJson(state: AppState): void {
+export function exportAsJson(state: AppState, projectName?: string): void {
   const data = buildExportData(state);
   const json = JSON.stringify(data, null, 2);
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  downloadFile(json, `cyclanyzer-export-${timestamp}.json`, 'application/json');
+  const prefix = projectName ? sanitizeFilename(projectName) : 'cyclanyzer-export';
+  downloadFile(json, `${prefix}_${timestamp}.json`, 'application/json');
 }
 
 /** Read and parse a JSON file from a File input */

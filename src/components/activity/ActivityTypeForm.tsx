@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ActivityType } from '../../types/domain';
 import { isValidActivityLabel, isValidHexColor } from '../../utils/validation';
 import { Button } from '../common/Button';
@@ -9,21 +9,47 @@ type ActivityTypeFormProps = {
   onCancel: () => void;
 };
 
-const DEFAULT_COLORS = ['#4CAF50', '#2196F3', '#FF9800', '#F44336', '#9C27B0', '#00BCD4', '#795548', '#607D8B', '#E91E63', '#CDDC39'];
+const PASTEL_COLORS = [
+  '#7EB8DA', // blau
+  '#A8D8A8', // gruen
+  '#F7C59F', // orange
+  '#F4A4A4', // rot
+  '#C3A6D8', // violett
+  '#F9D96C', // gelb
+  '#8ED3C7', // tuerkis
+  '#F2A7C3', // rosa
+];
 
 export function ActivityTypeForm({ initial, onSave, onCancel }: ActivityTypeFormProps) {
   const [label, setLabel] = useState(initial?.label ?? '');
-  const [color, setColor] = useState(initial?.color ?? DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)]);
+  const defaultColor = initial?.color ?? PASTEL_COLORS[Math.floor(Math.random() * PASTEL_COLORS.length)];
+  const [color, setColor] = useState(defaultColor);
+  const [customColors, setCustomColors] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ label?: string; color?: string }>({});
+  const colorInputRef = useRef<HTMLInputElement>(null);
+
+  const allSwatches = [...PASTEL_COLORS, ...customColors];
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const newErrors: typeof errors = {};
     if (!isValidActivityLabel(label)) newErrors.label = 'Bezeichnung darf nicht leer sein.';
-    if (!isValidHexColor(color)) newErrors.color = 'Bitte gültige HEX-Farbe eingeben (z. B. #FF0000).';
+    if (!isValidHexColor(color)) newErrors.color = 'Bitte gültige HEX-Farbe eingeben.';
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
       onSave(label.trim(), color);
+    }
+  }
+
+  function handleCustomColorPick() {
+    colorInputRef.current?.click();
+  }
+
+  function handleNativeColorChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const c = e.target.value;
+    setColor(c);
+    if (!allSwatches.includes(c)) {
+      setCustomColors((prev) => [...prev, c]);
     }
   }
 
@@ -40,24 +66,40 @@ export function ActivityTypeForm({ initial, onSave, onCancel }: ActivityTypeForm
         />
         {errors.label && <span className="form-error">{errors.label}</span>}
       </div>
+
       <div className="form-field">
         <label className="form-label">Farbe</label>
-        <div className="color-input-row">
+        <div className="color-palette">
+          {allSwatches.map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`color-palette__swatch ${color === c ? 'color-palette__swatch--selected' : ''}`}
+              style={{ backgroundColor: c }}
+              onClick={() => setColor(c)}
+              title={c}
+            />
+          ))}
+          <button
+            type="button"
+            className="color-palette__swatch color-palette__swatch--add"
+            onClick={handleCustomColorPick}
+            title="Eigene Farbe wählen"
+          >
+            +
+          </button>
           <input
+            ref={colorInputRef}
             type="color"
             value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="color-picker"
-          />
-          <input
-            className={`form-input form-input--short ${errors.color ? 'form-input--error' : ''}`}
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            placeholder="#4CAF50"
+            onChange={handleNativeColorChange}
+            className="color-palette__hidden-input"
+            tabIndex={-1}
           />
         </div>
         {errors.color && <span className="form-error">{errors.color}</span>}
       </div>
+
       <div className="activity-form__actions">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>Abbrechen</Button>
         <Button type="submit" variant="primary" size="sm">{initial ? 'Speichern' : 'Hinzufügen'}</Button>

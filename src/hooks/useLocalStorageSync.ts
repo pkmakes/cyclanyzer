@@ -8,7 +8,11 @@ export function loadFromLocalStorage(): AppState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as AppState;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !parsed.projectName) {
+      parsed.projectName = 'Neues Projekt';
+    }
+    return parsed as AppState;
   } catch {
     return null;
   }

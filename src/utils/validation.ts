@@ -53,5 +53,9 @@ export function validateImportData(data: unknown): { valid: boolean; error?: str
   }
 
   const exportData = data as ExportData;
-  return { valid: true, state: exportData.state };
+  const importedState = { ...exportData.state };
+  if (!importedState.projectName) {
+    importedState.projectName = 'Importiertes Projekt';
+  }
+  return { valid: true, state: importedState };
 }
