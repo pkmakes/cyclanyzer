@@ -255,6 +255,11 @@ body {
   }
 }
 
+.dropdown-menu__item--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .dropdown-menu__item--danger {
   color: var(--danger);
 }

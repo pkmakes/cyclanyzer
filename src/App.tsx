@@ -10,6 +10,8 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { loadFromLocalStorage, useLocalStorageSync } from './hooks/useLocalStorageSync';
 import { useBeforeUnloadWarning } from './hooks/useBeforeUnloadWarning';
 import { exportAsJson, readJsonFile } from './utils/exportImport';
+import { exportSegmentsCsv } from './utils/csv';
+import { exportChartAsPng } from './utils/exportChart';
 import { validateImportData } from './utils/validation';
 import { MeasurementLayout } from './components/layout/MeasurementLayout';
 import { DashboardPage } from './components/layout/DashboardPage';
@@ -82,10 +84,16 @@ function HamburgerMenu({
   onSave,
   onLoad,
   onNew,
+  onExportCsv,
+  onExportChart,
+  hasCycles,
 }: {
   onSave: () => void;
   onLoad: () => void;
   onNew: () => void;
+  onExportCsv: () => void;
+  onExportChart: () => void;
+  hasCycles: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -124,6 +132,23 @@ function HamburgerMenu({
           <button className="dropdown-menu__item" onClick={() => { onLoad(); setOpen(false); }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Laden
+          </button>
+          <div className="dropdown-menu__divider" />
+          <button
+            className={`dropdown-menu__item ${!hasCycles ? 'dropdown-menu__item--disabled' : ''}`}
+            onClick={() => { if (hasCycles) { onExportCsv(); setOpen(false); } }}
+            disabled={!hasCycles}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            Export Daten (CSV)
+          </button>
+          <button
+            className={`dropdown-menu__item ${!hasCycles ? 'dropdown-menu__item--disabled' : ''}`}
+            onClick={() => { if (hasCycles) { onExportChart(); setOpen(false); } }}
+            disabled={!hasCycles}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></svg>
+            Export Diagramm (PNG)
           </button>
           <div className="dropdown-menu__divider" />
           <button className="dropdown-menu__item dropdown-menu__item--danger" onClick={() => { onNew(); setOpen(false); }}>
@@ -267,6 +292,16 @@ export default function App() {
     fileInputRef.current?.click();
   }
 
+  function handleExportCsv() {
+    exportSegmentsCsv(state.cycles);
+    addToast('CSV exportiert.', 'success');
+  }
+
+  function handleExportChart() {
+    exportChartAsPng();
+    addToast('Diagramm exportiert.', 'success');
+  }
+
   async function handleLoadFile(file: File) {
     try {
       const raw = await readJsonFile(file);
@@ -336,7 +371,7 @@ export default function App() {
           <div className="header-tabs">
             <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
-          <HamburgerMenu onSave={handleSave} onLoad={handleLoadTrigger} onNew={handleNew} />
+          <HamburgerMenu onSave={handleSave} onLoad={handleLoadTrigger} onNew={handleNew} onExportCsv={handleExportCsv} onExportChart={handleExportChart} hasCycles={state.cycles.length > 0} />
         </div>
       </header>
 
@@ -345,7 +380,7 @@ export default function App() {
         <div className="project-name-area">
           <ProjectNameEditor projectName={state.projectName} onCommit={handleSetProjectName} />
         </div>
-        <HamburgerMenu onSave={handleSave} onLoad={handleLoadTrigger} onNew={handleNew} />
+        <HamburgerMenu onSave={handleSave} onLoad={handleLoadTrigger} onNew={handleNew} onExportCsv={handleExportCsv} onExportChart={handleExportChart} hasCycles={state.cycles.length > 0} />
       </header>
 
       {/* Page content */}
